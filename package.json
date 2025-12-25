@@ -1,0 +1,23 @@
+{
+  "name": "assignment-10-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "cors": "^2.8.5",
+    "daisyui": "^5.5.14",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "mongodb": "^7.0.0",
+    "nodemon": "^3.1.11",
+    "tailwindcss": "^4.1.18"
+  }
+}
