@@ -1,8 +1,12 @@
 const express = require('express')
 const app = express()
 const admin = require("firebase-admin");
+const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const port = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(cors())
 
 
 
@@ -27,6 +31,22 @@ async function run() {
   try {
     await client.connect();
     
+    const ModelDatabase = client.db('ModelDB');
+    const models = ModelDatabase.collection('models');
+
+    app.post('/models',async(req,res)=>{
+      const body = req.body;
+      console.log(body);
+      const result = await models.insertOne(body);
+      console.log("result",result);
+      res.send(result)
+    })
+    
+    app.get('/recentModels',async(req,res)=>{
+      const cursor = await models.find({}).limit(6).sort({createdAt:1}).toArray();
+      res.send(cursor)
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
