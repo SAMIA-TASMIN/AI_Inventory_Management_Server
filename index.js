@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const admin = require("firebase-admin");
@@ -15,8 +15,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-
-const uri =  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.at3dlqg.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.at3dlqg.mongodb.net/?appName=Cluster0`;
 // const uri =
 //   "mongodb+srv://faravi:wrZAPJSNhCVnZ9Vu@cluster0.at3dlqg.mongodb.net/?appName=Cluster0";
 
@@ -67,26 +66,44 @@ async function run() {
       res.send(data);
     });
 
+    
     app.get("/models/:id", async (req, res) => {
       const id = req.params.id;
-     const query= {_id: new ObjectId(id)}
-     console.log("query",query);
-      const data = await models.findOne(query)
+      const query = { _id: new ObjectId(id) };
+      console.log("query", query);
+      const data = await models.findOne(query);
       console.log(data);
       res.send(data);
     });
+    app.delete("/models/:id",async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await models.deleteOne(query)
+      res.send(result)
+    });
 
-    app.patch('/models/:id',async(req,res)=>{
-
+    app.patch("/models/:id", async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
-      const query = {_id:new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const updateData = {
-        $set:updatedData
-      }
+        $set: updatedData,
+      };
 
-      const result = await models.updateOne(query,updateData,{})
+      const result = await models.updateOne(query, updateData, {});
+      res.send(result);
+    });
+
+    app.get('/mymodel',async(req,res)=>{
+      const email = req.query.email;
+      console.log(email);
+      const query ={}
+      if(email){
+       query.createdBy = email
+      }
+      const result = await models.find(query).toArray()
       res.send(result)
+
     })
 
     await client.db("admin").command({ ping: 1 });
