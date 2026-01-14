@@ -33,7 +33,7 @@ async function run() {
 
     const ModelDatabase = client.db("ModelDB");
     const models = ModelDatabase.collection("models");
-    const users = ModelDatabase.collection("users");
+    const purchased = ModelDatabase.collection("purchased");
 
     // Users APu
     app.post("/users", async (req, res) => {
@@ -104,6 +104,13 @@ async function run() {
       const result = await models.find(query).toArray()
       res.send(result)
 
+    })
+
+    app.post('/purchasedModel',async(req,res)=>{
+      const body = req.body;
+      const result = await purchased.insertOne(body);
+      console.log(result);
+      res.send(result)
     })
 
     await client.db("admin").command({ ping: 1 });
