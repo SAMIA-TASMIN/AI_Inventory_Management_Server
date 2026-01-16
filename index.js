@@ -16,8 +16,6 @@ admin.initializeApp({
 });
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.at3dlqg.mongodb.net/?appName=Cluster0`;
-// const uri =
-//   "mongodb+srv://faravi:wrZAPJSNhCVnZ9Vu@cluster0.at3dlqg.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -35,7 +33,7 @@ async function run() {
     const models = ModelDatabase.collection("models");
     const purchased = ModelDatabase.collection("purchased");
 
-    // Users APu
+    // Users API
     app.post("/users", async (req, res) => {
       const newUsers = req.body;
       const result = await users.insertOne(newUsers);
@@ -61,12 +59,37 @@ async function run() {
       res.send(cursor);
     });
 
+    // ✅ NEW - Search Route
+    app.get("/models/search", async (req, res) => {
+      const searchTerm = req.query.q || "";
+      
+      const query = searchTerm 
+        ? { name: { $regex: searchTerm, $options: 'i' } }
+        : {};
+        
+      const data = await models.find(query).toArray();
+      res.send(data);
+    });
+
+    // ✅ MODIFIED - Filter Route (শুধু framework এর জন্য)
+    app.get("/models/filter", async (req, res) => {
+      const { framework } = req.query;
+      
+      const query = {};
+      
+      if (framework) {
+        query.framework = framework;
+      }
+      
+      const data = await models.find(query).toArray();
+      res.send(data);
+    });
+
     app.get("/models", async (req, res) => {
       const data = await models.find({}).toArray();
       res.send(data);
     });
 
-    
     app.get("/models/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -75,43 +98,56 @@ async function run() {
       console.log(data);
       res.send(data);
     });
-    app.delete("/models/:id",async(req,res)=>{
+
+    app.delete("/models/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
-      const result = await models.deleteOne(query)
-      res.send(result)
+      const query = { _id: new ObjectId(id) };
+      const result = await models.deleteOne(query);
+      res.send(result);
     });
 
+    // ✅ MODIFIED - Existing PATCH route
     app.patch("/models/:id", async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const query = { _id: new ObjectId(id) };
-      const updateData = {
-        $set: updatedData,
-      };
+      
+      // Check if $inc operator is used
+      const updateData = updatedData.$inc 
+        ? { $inc: updatedData.$inc }
+        : { $set: updatedData };
 
       const result = await models.updateOne(query, updateData, {});
       res.send(result);
     });
 
-    app.get('/mymodel',async(req,res)=>{
+    app.get('/mymodel', async (req, res) => {
       const email = req.query.email;
       console.log(email);
-      const query ={}
-      if(email){
-       query.createdBy = email
+      const query = {};
+      if (email) {
+        query.createdBy = email;
       }
-      const result = await models.find(query).toArray()
-      res.send(result)
+      const result = await models.find(query).toArray();
+      res.send(result);
+    });
 
-    })
-
-    app.post('/purchasedModel',async(req,res)=>{
+    app.post('/purchasedModel', async (req, res) => {
       const body = req.body;
       const result = await purchased.insertOne(body);
       console.log(result);
-      res.send(result)
-    })
+      res.send(result);
+    });
+
+    app.get('/purchasedModel', async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.createdBy = email;
+      }
+      const result = await purchased.find(query).toArray();
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
