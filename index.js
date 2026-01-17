@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const admin = require("firebase-admin");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
@@ -9,11 +8,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-const serviceAccount = require("./ai-inventory-management-2575b-firebase-adminsdk-fbsvc-52566f2a04.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.at3dlqg.mongodb.net/?appName=Cluster0`;
 
@@ -149,7 +143,7 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+   
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
